@@ -1,0 +1,41 @@
+# 最初にDocker composeのバージョンを記載
+version: '3'
+
+#dockerボリュームを作成する
+volumes:
+  db-data:
+
+services:
+# サービス名を記載
+  web:
+# build情報を記載
+    build: .
+# Portを記載
+    ports:
+# 複数指定する場合には - で箇条書きする
+      - '3000:3000'
+# 共有パスを記載する　※どの環境でもできるように相対パスで記載する
+    volumes:
+      - '.:/product-register'
+# 環境変数を登録する
+    environment:
+      - 'DATABASE_PASSWORD=postgres'
+# ttyは-t stdin_openは-iのオプションに該当
+    tty: true
+    stdin_open: true
+#指定したサービスが起動してから起動するという依存関係を記載する
+    depends_on:
+      - db
+#別サービスにアクセスできるようにする
+    links:
+      - db
+
+  db:
+# imagesからコンテナを起動
+    image: postgres
+# dockerボリュームにマウント？
+    volumes:
+      - 'db-data:/var/lib/postgresql/data'
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
